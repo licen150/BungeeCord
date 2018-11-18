@@ -16,10 +16,6 @@ import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
-import net.md_5.bungee.api.score.Objective;
-import net.md_5.bungee.api.score.Score;
-import net.md_5.bungee.api.score.Scoreboard;
-import net.md_5.bungee.api.score.Team;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.md_5.bungee.connection.CancelSendSignal;
 import net.md_5.bungee.connection.DownstreamBridge;
@@ -42,8 +38,6 @@ import net.md_5.bungee.protocol.packet.LoginRequest;
 import net.md_5.bungee.protocol.packet.LoginSuccess;
 import net.md_5.bungee.protocol.packet.PluginMessage;
 import net.md_5.bungee.protocol.packet.Respawn;
-import net.md_5.bungee.protocol.packet.ScoreboardObjective;
-import net.md_5.bungee.protocol.packet.ScoreboardScore;
 import net.md_5.bungee.protocol.packet.SetCompression;
 import net.md_5.bungee.util.BufUtil;
 
@@ -167,6 +161,7 @@ public class ServerConnector extends PacketHandler
     }
 
     @Override
+    //BotFilter - applied alt-respawn branch(https://github.com/SpigotMC/BungeeCord/tree/alt-respawn) with some fixes
     public void handle(Login login) throws Exception
     {
         Preconditions.checkState( thisState == State.LOGIN, "Not expecting LOGIN" );
@@ -190,35 +185,24 @@ public class ServerConnector extends PacketHandler
             ch.write( message );
         }
 
-        if ( user.getSettings() != null )
-        {
-            ch.write( user.getSettings() );
-        }
-
+        //BotFilter - removed a clientsettings send
         if ( user.getForgeClientHandler().getClientModList() == null && !user.getForgeClientHandler().isHandshakeComplete() ) // Vanilla
         {
             user.getForgeClientHandler().setHandshakeComplete();
         }
 
-        if ( user.isNeedLogin() ) //BotFilter
+        if ( user.isNeedLogin() ) //BotFilter //user.getServer() == null
         {
             user.setNeedLogin( false ); //BotFilter
-            // Once again, first connection
-            user.setClientEntityId( login.getEntityId() );
-            user.setServerEntityId( login.getEntityId() );
 
-            // Set tab list size, this sucks balls, TODO: what shall we do about packet mutability
             Login modLogin = new Login( login.getEntityId(), login.getGameMode(), (byte) login.getDimension(), login.getDifficulty(),
                     (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.isReducedDebugInfo() );
-
             user.unsafe().sendPacket( modLogin );
 
             ByteBuf brand = ByteBufAllocator.DEFAULT.heapBuffer();
             DefinedPacket.writeString( "BotFilter (https://vk.cc/8hr1pU)", brand );
             user.unsafe().sendPacket( new PluginMessage( user.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_13 ? "minecraft:brand" : "MC|Brand", DefinedPacket.toArray( brand ), handshakeHandler.isServerForge() ) );
             brand.release();
-
-            user.setDimension( login.getDimension() );
         } else
         {
             if ( user.getServer() != null ) //BotFilter
@@ -227,38 +211,23 @@ public class ServerConnector extends PacketHandler
             }
             user.getTabListHandler().onServerChange();
 
-            Scoreboard serverScoreboard = user.getServerSentScoreboard();
-            for ( Objective objective : serverScoreboard.getObjectives() )
-            {
-                user.unsafe().sendPacket( new ScoreboardObjective( objective.getName(), objective.getValue(), ScoreboardObjective.HealthDisplay.fromString( objective.getType() ), (byte) 1 ) );
-            }
-            for ( Score score : serverScoreboard.getScores() )
-            {
-                user.unsafe().sendPacket( new ScoreboardScore( score.getItemName(), (byte) 1, score.getScoreName(), score.getValue() ) );
-            }
-            for ( Team team : serverScoreboard.getTeams() )
-            {
-                user.unsafe().sendPacket( new net.md_5.bungee.protocol.packet.Team( team.getName() ) );
-            }
-            serverScoreboard.clear();
+            //BotFilter - removed scoreboards clear code
+            user.getServerSentScoreboard().clear();
 
             for ( UUID bossbar : user.getSentBossBars() )
             {
                 // Send remove bossbar packet
-                user.unsafe().sendPacket( new net.md_5.bungee.protocol.packet.BossBar( bossbar, 1 ) );
+                user.unsafe().sendPacket( new net.md_5.bungee.protocol.packet.BossBar( bossbar, 1 ) ); //Keep this
             }
             user.getSentBossBars().clear();
 
             user.setDimensionChange( true );
-            if ( login.getDimension() == user.getDimension() )
-            {
-                user.unsafe().sendPacket( new Respawn( ( login.getDimension() >= 0 ? -1 : 0 ), login.getDifficulty(), login.getGameMode(), login.getLevelType() ) );
-            }
 
-            user.setServerEntityId( login.getEntityId() );
+            Login modLogin = new Login( login.getEntityId(), login.getGameMode(), ( login.getDimension() >= 0 ? -1 : 0 ), login.getDifficulty(),
+                    (byte) user.getPendingConnection().getListener().getTabListSize(), login.getLevelType(), login.isReducedDebugInfo() );
+            user.unsafe().sendPacket( modLogin );
             user.unsafe().sendPacket( new Respawn( login.getDimension(), login.getDifficulty(), login.getGameMode(), login.getLevelType() ) );
-            user.setDimension( login.getDimension() );
-
+            
             // Remove from old servers
             if ( this.user.getServer() != null ) //BotFilter
             {

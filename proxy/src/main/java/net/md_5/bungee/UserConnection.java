@@ -95,9 +95,7 @@ public final class UserConnection implements ProxiedPlayer
     private ServerConnection server;
     @Getter
     @Setter
-    private int dimension;
-    @Getter
-    @Setter
+    //BotFilter - removed dimension field
     private boolean dimensionChange = true;
     @Getter
     private final Collection<ServerInfo> pendingConnects = new HashSet<>();
@@ -125,12 +123,7 @@ public final class UserConnection implements ProxiedPlayer
     private final Collection<String> groups = new CaseInsensitiveSet();
     private final Collection<String> permissions = new CaseInsensitiveSet();
     /*========================================================================*/
-    @Getter
-    @Setter
-    private int clientEntityId;
-    @Getter
-    @Setter
-    private int serverEntityId;
+    //BotFilter - removed clientEntityId and serverEntityId fields
     @Getter
     private ClientSettings settings;
     @Getter
@@ -140,8 +133,7 @@ public final class UserConnection implements ProxiedPlayer
     /*========================================================================*/
     @Getter
     private String displayName;
-    @Getter
-    private EntityMap entityRewrite;
+    //BotFilter - removed entityRewrite field
     private Locale locale;
     /*========================================================================*/
     @Getter
@@ -162,7 +154,7 @@ public final class UserConnection implements ProxiedPlayer
 
     public void init()
     {
-        this.entityRewrite = EntityMap.getEntityMap( getPendingConnection().getVersion() );
+        //this.entityRewrite = EntityMap.getEntityMap( getPendingConnection().getVersion() ); //BotFilter
 
         this.displayName = name;
 
