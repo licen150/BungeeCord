@@ -209,6 +209,15 @@ public class Settings extends Config
 
     @Comment(
             {
+                "Отключить/Включить ли декодирование ScoreBoard пакетов от сервера? ",
+                "Поставте false, что включить декодирование ScoreBoard пакетов. true, чтобы отключить",
+                "Отключение декодирование ScoreBoard'ов может достаточно сильно сэкономить память и уменьшить нагрузку на CPU,",
+                "но может сломать совместимость с таким плагинами как BungeeTabListPlus, поставте false если есть проблемы с плагинами"
+            })
+    public boolean DISABLE_SERVER_SCOREBOARDS = true;
+
+    @Comment(
+            {
                 "Включить/Отключить ли совместимость со старыми плагинами, которые используют ScoreBoard на бандже?",
                 "Поставте false, если есть проблемы с новыми плагинами."
             })
@@ -216,6 +225,7 @@ public class Settings extends Config
 
     @Comment("Включить ли фикс от 'Team 'xxx' already exist in this scoreboard'")
     public boolean FIX_SCOREBOARD_TEAMS = true;
+
     public void reload(File file)
     {
         load( file );

@@ -68,6 +68,11 @@ public class BotFilter
         Settings.IMP.reload( new File( "BotFilter", "config.yml" ) );
         DefinedPacket.fix_scoreboards = Settings.IMP.FIX_SCOREBOARDS;
         Scoreboard.DISABLE_DUBLICATE = Settings.IMP.FIX_SCOREBOARD_TEAMS;
+        if ( Settings.IMP.DISABLE_SERVER_SCOREBOARDS )
+        {
+            Protocol.GAME.TO_CLIENT.disableDecodingForScoreBoards();
+            BungeeCord.getInstance().getLogger().log( Level.WARNING, "Отключено декодирование ScoreBoard'ов. Включите декодирование если испытываете проблемы с плагинами. Например с BungeeTabListPlus " );
+        }
         checkForUpdates( startup );
         if ( !CachedCaptcha.generated )
         {
@@ -99,6 +104,7 @@ public class BotFilter
         ManyChecksUtils.clear();
         serverPingUtils.clear();
         executor.shutdownNow();
+        Protocol.GAME.TO_CLIENT.registerScoreBoards();
     }
 
     /**
