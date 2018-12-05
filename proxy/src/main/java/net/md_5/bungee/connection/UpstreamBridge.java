@@ -2,7 +2,9 @@ package net.md_5.bungee.connection;
 
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.Util;
@@ -187,7 +189,7 @@ public class UpstreamBridge extends PacketHandler
         }
         lastTabCompletion = now;
         //BotFilter end
-        
+
         List<String> suggestions = new ArrayList<>();
 
         if ( tabComplete.getCursor().startsWith( "/" ) )
@@ -263,9 +265,22 @@ public class UpstreamBridge extends PacketHandler
             throw CancelSendSignal.INSTANCE;
         }
 
-        // TODO: Unregister as well?
+        // TODO: Unregister as well? //BotFilter todo - add unregister support
         if ( PluginMessage.SHOULD_RELAY.apply( pluginMessage ) )
         {
+            //BotFilter start ; Some clients can resend REGISTER packets when they recieve a Login packet again. Skip this packets
+            if ( pluginMessage.isRegisterTag() )
+            {
+                List<PluginMessage> relayMessages = con.getPendingConnection().getRelayMessages().stream().filter( PluginMessage::isRegisterTag ).collect( Collectors.toList() );
+                for ( PluginMessage pm : relayMessages )
+                {
+                    if ( Arrays.equals( pm.getData(), pluginMessage.getData() ) )
+                    {
+                        throw CancelSendSignal.INSTANCE;
+                    }
+                }
+            }
+            //BotFilter end
             con.getPendingConnection().getRelayMessages().add( pluginMessage );
         }
     }

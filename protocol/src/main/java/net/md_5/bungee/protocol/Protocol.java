@@ -83,20 +83,20 @@ public enum Protocol
                     map( ProtocolConstants.MINECRAFT_1_12, 0x23 ),
                     map( ProtocolConstants.MINECRAFT_1_13, 0x25 )
             );
-            TO_CLIENT.registerPacket( //BotFilter map -> map_false
+            TO_CLIENT.registerPacket( //BotFilter added false
                     Chat.class, Chat::new,
-                    map_false( ProtocolConstants.MINECRAFT_1_8, 0x02 ),
-                    map_false( ProtocolConstants.MINECRAFT_1_9, 0x0F ),
-                    map_false( ProtocolConstants.MINECRAFT_1_12, 0x0F ),
-                    map_false( ProtocolConstants.MINECRAFT_1_13, 0x0E )
+                    map( ProtocolConstants.MINECRAFT_1_8, 0x02, false ),
+                    map( ProtocolConstants.MINECRAFT_1_9, 0x0F, false ),
+                    map( ProtocolConstants.MINECRAFT_1_12, 0x0F, false ),
+                    map( ProtocolConstants.MINECRAFT_1_13, 0x0E, false )
             );
             TO_CLIENT.registerPacket(
-                    Respawn.class, Respawn::new, //BotFilter map -> map_false
-                    map_false( ProtocolConstants.MINECRAFT_1_8, 0x07 ),
-                    map_false( ProtocolConstants.MINECRAFT_1_9, 0x33 ),
-                    map_false( ProtocolConstants.MINECRAFT_1_12, 0x34 ),
-                    map_false( ProtocolConstants.MINECRAFT_1_12_1, 0x35 ),
-                    map_false( ProtocolConstants.MINECRAFT_1_13, 0x38 )
+                    Respawn.class, Respawn::new, //BotFilter added false
+                    map( ProtocolConstants.MINECRAFT_1_8, 0x07, false ),
+                    map( ProtocolConstants.MINECRAFT_1_9, 0x33, false ),
+                    map( ProtocolConstants.MINECRAFT_1_12, 0x34, false ),
+                    map( ProtocolConstants.MINECRAFT_1_12_1, 0x35, false ),
+                    map( ProtocolConstants.MINECRAFT_1_13, 0x38, false )
             );
             TO_CLIENT.registerPacket(
                     BossBar.class, BossBar::new,
@@ -119,7 +119,7 @@ public enum Protocol
                     map( ProtocolConstants.MINECRAFT_1_12, 0x0E ),
                     map( ProtocolConstants.MINECRAFT_1_13, 0x10 )
             );
-            TO_CLIENT.registerScoreBoards(); //BotFilter
+            registerScoreBoards( true ); //BotFilter
             TO_CLIENT.registerPacket(
                     PluginMessage.class, PluginMessage::new,
                     map( ProtocolConstants.MINECRAFT_1_8, 0x3F ),
@@ -450,9 +450,40 @@ public enum Protocol
         return new ProtocolMapping( protocol, id, packetdecoding ); //BotFilter - added true
     }
 
-    private static ProtocolMapping map_false(int protocol, int id)
+    public static final void registerScoreBoards(boolean decoding)
     {
-        return new ProtocolMapping( protocol, id, false );
+        GAME.TO_CLIENT.registerPacket(
+                ScoreboardObjective.class, ScoreboardObjective::new,
+                map( ProtocolConstants.MINECRAFT_1_8, 0x3B, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_9, 0x3F, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12, 0x41, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12_1, 0x42, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_13, 0x45, decoding )
+        );
+        GAME.TO_CLIENT.registerPacket(
+                ScoreboardScore.class, ScoreboardScore::new,
+                map( ProtocolConstants.MINECRAFT_1_8, 0x3C, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_9, 0x42, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12, 0x44, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12_1, 0x45, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_13, 0x48, decoding )
+        );
+        GAME.TO_CLIENT.registerPacket(
+                ScoreboardDisplay.class, ScoreboardDisplay::new,
+                map( ProtocolConstants.MINECRAFT_1_8, 0x3D, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_9, 0x38, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12, 0x3A, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12_1, 0x3B, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_13, 0x3E, decoding )
+        );
+        GAME.TO_CLIENT.registerPacket(
+                Team.class, Team::new,
+                map( ProtocolConstants.MINECRAFT_1_8, 0x3E, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_9, 0x41, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12, 0x43, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_12_1, 0x44, decoding ),
+                map( ProtocolConstants.MINECRAFT_1_13, 0x47, decoding )
+        );
     }
     //BotFilter end
 
@@ -531,75 +562,20 @@ public enum Protocol
         }
 
         //BotFilter start
-        public final <P extends DefinedPacket> void disableDecodingForScoreBoards()
-        {
-            List<Class<? extends DefinedPacket>> scoreboards = Arrays.asList( ScoreboardDisplay.class, ScoreboardObjective.class, ScoreboardScore.class, Team.class );
-
-            protocols.valueCollection().forEach( data ->
-            {
-                scoreboards.forEach( pclass ->
-                {
-                    if ( data.packetMap.containsKey( pclass ) )
-                    {
-                        data.packetConstructors[data.packetMap.get( pclass )] = null;
-                    }
-                } );
-            } );
-        }
-
-        public final void registerScoreBoards()
-        {
-            registerPacket(
-                    ScoreboardObjective.class, ScoreboardObjective::new,
-                    map( ProtocolConstants.MINECRAFT_1_8, 0x3B ),
-                    map( ProtocolConstants.MINECRAFT_1_9, 0x3F ),
-                    map( ProtocolConstants.MINECRAFT_1_12, 0x41 ),
-                    map( ProtocolConstants.MINECRAFT_1_12_1, 0x42 ),
-                    map( ProtocolConstants.MINECRAFT_1_13, 0x45 )
-            );
-            registerPacket(
-                    ScoreboardScore.class, ScoreboardScore::new,
-                    map( ProtocolConstants.MINECRAFT_1_8, 0x3C ),
-                    map( ProtocolConstants.MINECRAFT_1_9, 0x42 ),
-                    map( ProtocolConstants.MINECRAFT_1_12, 0x44 ),
-                    map( ProtocolConstants.MINECRAFT_1_12_1, 0x45 ),
-                    map( ProtocolConstants.MINECRAFT_1_13, 0x48 )
-            );
-            registerPacket(
-                    ScoreboardDisplay.class, ScoreboardDisplay::new,
-                    map( ProtocolConstants.MINECRAFT_1_8, 0x3D ),
-                    map( ProtocolConstants.MINECRAFT_1_9, 0x38 ),
-                    map( ProtocolConstants.MINECRAFT_1_12, 0x3A ),
-                    map( ProtocolConstants.MINECRAFT_1_12_1, 0x3B ),
-                    map( ProtocolConstants.MINECRAFT_1_13, 0x3E )
-            );
-            registerPacket(
-                    Team.class, Team::new,
-                    map( ProtocolConstants.MINECRAFT_1_8, 0x3E ),
-                    map( ProtocolConstants.MINECRAFT_1_9, 0x41 ),
-                    map( ProtocolConstants.MINECRAFT_1_12, 0x43 ),
-                    map( ProtocolConstants.MINECRAFT_1_12_1, 0x44 ),
-                    map( ProtocolConstants.MINECRAFT_1_13, 0x47 )
-            );
-        }
-
-        //BotFilter end
         protected final <P extends DefinedPacket> void registerPacket(Class<? extends DefinedPacket> packetClass, ProtocolMapping... mappings)
         {
             registerPacket( packetClass, MetaFactoryUtils.createNoArgsConstructorUnchecked( packetClass ), mappings );
         }
+        //BotFilter end
 
-        protected final <P extends DefinedPacket> void registerPacket(Class<? extends DefinedPacket> packetClass, Supplier<P> packetSupplier, ProtocolMapping... mappings)
+        protected final <P extends DefinedPacket> void registerPacket(Class<? extends DefinedPacket> packetClass, Supplier<P> packetSupplier, ProtocolMapping... mappings) //BotFilter Supplier<P> packetSupplier
         {
 
             for ( ProtocolMapping mapping : mappings )
             {
                 ProtocolData data = protocols.get( mapping.protocolVersion );
                 data.packetMap.put( packetClass, mapping.packetID );
-                if ( mapping.packetDecoding ) //BotFilter
-                {
-                    data.packetConstructors[mapping.packetID] = packetSupplier;
-                }
+                data.packetConstructors[mapping.packetID] = mapping.packetDecoding ? packetSupplier : null;
                 List<Integer> links = linkedProtocols.get( mapping.protocolVersion );
                 if ( links != null )
                 {

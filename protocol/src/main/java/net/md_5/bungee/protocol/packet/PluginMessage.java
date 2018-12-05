@@ -53,18 +53,28 @@ public class PluginMessage extends DefinedPacket
         @Override
         public boolean apply(PluginMessage input)
         {
-            return ( input.getTag().equals( "REGISTER" ) || input.getTag().equals( "minecraft:register" ) || input.getTag().equals( "MC|Brand" ) || input.getTag().equals( "minecraft:brand" ) ) && input.getData().length < Byte.MAX_VALUE;
+            return ( input.isRegisterTag || input.getTag().equals( "MC|Brand" ) || input.getTag().equals( "minecraft:brand" ) ) && input.getData().length < Byte.MAX_VALUE;
         }
     };
     //
     private String tag;
     private byte[] data;
-
     /**
      * Allow this packet to be sent as an "extended" packet.
      */
     private boolean allowExtendedPacket = false;
 
+    //BotFilter start
+    private Boolean isRegisterTag = null;
+
+    public PluginMessage(String tag, byte[] data, boolean allowExtendedPacket)
+    {
+        this.tag = tag;
+        this.data = data;
+        this.allowExtendedPacket = allowExtendedPacket;
+    }
+
+    //BotFilter end
     @Override
     public void read(ByteBuf buf, ProtocolConstants.Direction direction, int protocolVersion)
     {
@@ -97,6 +107,15 @@ public class PluginMessage extends DefinedPacket
             return "minecraft:brand";
         }
         return input;
+    }
+
+    public boolean isRegisterTag()
+    {
+        if ( isRegisterTag == null )
+        {
+            isRegisterTag = ( getTag().equals( "REGISTER" ) || getTag().equals( "minecraft:register" ) );
+        }
+        return isRegisterTag;
     }
 
     //BotFilter end

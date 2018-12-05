@@ -37,32 +37,32 @@ import ru.leymooo.botfilter.utils.ServerPingUtils;
  */
 public class BotFilter
 {
-
+    
     public static final long ONE_MIN = 60000;
-
+    
     @Getter
     private final Map<String, Connector> connectedUsersSet = new ConcurrentHashMap<>();
     //UserName, Ip
     private final Map<String, String> userCache = new ConcurrentHashMap<>();
-
+    
     private final ExecutorService executor = Executors.newFixedThreadPool( Runtime.getRuntime().availableProcessors() * 2 );
-
+    
     @Getter
     private final Sql sql;
     @Getter
     private final GeoIp geoIp;
     @Getter
     private final ServerPingUtils serverPingUtils;
-
+    
     private final CheckState normalState;
     private final CheckState attackState;
-
+    
     private int botCounter = 0;
     private long lastAttack = 0;
     @Setter
     @Getter
     private long lastCheck = System.currentTimeMillis();
-
+    
     public BotFilter(boolean startup)
     {
         Settings.IMP.reload( new File( "BotFilter", "config.yml" ) );
@@ -70,7 +70,7 @@ public class BotFilter
         Scoreboard.DISABLE_DUBLICATE = Settings.IMP.FIX_SCOREBOARD_TEAMS;
         if ( Settings.IMP.DISABLE_SERVER_SCOREBOARDS )
         {
-            Protocol.GAME.TO_CLIENT.disableDecodingForScoreBoards();
+            Protocol.registerScoreBoards( false );
             BungeeCord.getInstance().getLogger().log( Level.WARNING, "Отключено декодирование ScoreBoard'ов. Включите декодирование если испытываете проблемы с плагинами. Например с BungeeTabListPlus " );
         }
         checkForUpdates( startup );
@@ -86,7 +86,7 @@ public class BotFilter
         serverPingUtils = new ServerPingUtils( this );
         BotFilterThread.start();
     }
-
+    
     public void disable()
     {
         BotFilterThread.stop();
@@ -104,7 +104,7 @@ public class BotFilter
         ManyChecksUtils.clear();
         serverPingUtils.clear();
         executor.shutdownNow();
-        Protocol.GAME.TO_CLIENT.registerScoreBoards();
+        Protocol.registerScoreBoards( true );
     }
 
     /**
@@ -240,25 +240,25 @@ public class BotFilter
         }
         return false;
     }
-
+    
     public boolean checkBigPing(double ping)
     {
         int mode = isUnderAttack() ? 1 : 0;
         return ping != -1 && Settings.IMP.PING_CHECK.MODE != 2 && ( Settings.IMP.PING_CHECK.MODE == 0 || Settings.IMP.PING_CHECK.MODE == mode ) && ping >= Settings.IMP.PING_CHECK.MAX_PING;
     }
-
+    
     public boolean isGeoIpEnabled()
     {
         int mode = isUnderAttack() ? 1 : 0;
         return geoIp.isEnabled() && ( Settings.IMP.GEO_IP.MODE == 0 || Settings.IMP.GEO_IP.MODE == mode );
     }
-
+    
     public boolean checkGeoIp(InetAddress address)
     {
-
+        
         return !geoIp.isAllowed( address );
     }
-
+    
     public void checkAsyncIfNeeded(InitialHandler handler)
     {
         InetAddress address = handler.getAddress().getAddress();
@@ -271,7 +271,7 @@ public class BotFilter
             bungee.getLogger().log( Level.INFO, "(BF) [{0}] disconnected: Too many checks in 10 min", address );
             return;
         }
-
+        
         ServerPingUtils ping = getServerPingUtils();
         if ( ping.needCheck() && ping.needKickOrRemove( address ) )
         {
@@ -279,7 +279,7 @@ public class BotFilter
             bungee.getLogger().log( Level.INFO, "(BF) [{0}] disconnected: The player did not ping the server", address.getHostAddress() );
             return;
         }
-
+        
         if ( bungee.getConnectionThrottle() != null && bungee.getConnectionThrottle().throttle( address ) )
         {
             PacketUtils.kickPlayer( KickType.THROTTLE, Protocol.LOGIN, ch, version ); //BotFilter
@@ -304,12 +304,12 @@ public class BotFilter
             handler.delayedHandleOfLoginRequset();
         }
     }
-
+    
     public CheckState getCurrentCheckState()
     {
         return isUnderAttack() ? attackState : normalState;
     }
-
+    
     private CheckState getCheckState(int mode)
     {
         switch ( mode )
@@ -324,7 +324,7 @@ public class BotFilter
                 return CheckState.CAPTCHA_ON_POSITION_FAILED;
         }
     }
-
+    
     private void checkForUpdates(boolean startup)
     {
         Logger logger = BungeeCord.getInstance().getLogger();
@@ -339,7 +339,7 @@ public class BotFilter
             {
                 if ( !in.readLine().trim().equalsIgnoreCase( Settings.IMP.BOT_FILTER_VERSION ) )
                 {
-
+                    
                     logger.log( Level.INFO, "§c[BotFilter] §aНайдена новая версия!" );
                     logger.log( Level.INFO, "§c[BotFilter] §aПожалуйста обновитесь!" );
                     if ( startup )
@@ -356,7 +356,7 @@ public class BotFilter
             logger.log( Level.WARNING, "[BotFilter] Не могу проверить обновление", ex );
         }
     }
-
+    
     public static enum CheckState
     {
         ONLY_POSITION,
