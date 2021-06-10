@@ -14,6 +14,6 @@ public class CommandBungee extends Command
     @Override
     public void execute(CommandSender sender, String[] args)
     {
-        sender.sendMessage( "§aOpenLand §7» §bBotFilter от vk.com/Leymooo_s §7» §fhttp://www.rubukkit.org/threads/137038/" );
+        sender.sendMessage( "§aOpenLand §7» §bOpenLand by licen777 and kvikiKZ §7» §fhttp://vk.com/openlandmc" );
     }
 }
