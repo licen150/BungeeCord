@@ -21,7 +21,7 @@ public class BotFilterCommand extends Command
 
     public BotFilterCommand()
     {
-        super( "botfilter", null, "bf", "antibot", "gg" );
+        super( "botfilter", null, "bf", "antibot", "gg", "openland" );
     }
 
     @Override
@@ -34,12 +34,12 @@ public class BotFilterCommand extends Command
         }
         if ( args.length == 0 )
         {
-            sender.sendMessage( "§r--------------- §bBotFilter §cv" + Settings.IMP.BOT_FILTER_VERSION + "§r-----------------" );
+            sender.sendMessage( "§r--------------- §bOpenLand §cv" + Settings.IMP.BOT_FILTER_VERSION + "§r-----------------" );
             sender.sendMessage( "§r> §lbotfilter reload §6- §aПерезагружить конфиг" );
             sender.sendMessage( "§r> §lbotfilter stat §6- §aПоказать статистику" );
             sender.sendMessage( "§r> §lbotfilter export §6- §aВыгрузить список игроков, которые прошли проверку" );
             sender.sendMessage( "§r> §lbotfilter protection on/off §6- §aВключить или выключить ручной режим 'под атакой'" );
-            sender.sendMessage( "§r--------------- §bBotFilter §r-----------------" );
+            sender.sendMessage( "§r--------------- §bOpenLand §r-----------------" );
         } else if ( args[0].equalsIgnoreCase( "reload" ) )
         {
             BungeeCord.getInstance().getBotFilter().disable();
@@ -66,11 +66,11 @@ public class BotFilterCommand extends Command
     private void sendStat(CommandSender sender)
     {
         BotFilter botFilter = BungeeCord.getInstance().getBotFilter();
-        sender.sendMessage( "§r----------------- §bBotFilter §cv" + Settings.IMP.BOT_FILTER_VERSION + " §r-----------------" );
+        sender.sendMessage( "§r----------------- §bOpenLand §cv" + Settings.IMP.BOT_FILTER_VERSION + " §r-----------------" );
         sender.sendMessage( "§r> §lОбнаружена атака: " + ( botFilter.isUnderAttack() ? "§cДа" : "§aНет" ) );
         sender.sendMessage( "§r> §lБотов на проверке: " + botFilter.getOnlineOnFilter() );
         sender.sendMessage( "§r> §lПрошло проверку: " + botFilter.getUsersCount() );
-        sender.sendMessage( "§r> §lСкачать BotFilter: http://www.rubukkit.org/threads/137038/" );
+        sender.sendMessage( "§r> §lBungeecord for OpenLand by licen777" );
     }
 
     private void export(CommandSender sender, String[] args)
