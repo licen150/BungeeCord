@@ -122,7 +122,7 @@ public class QueryHandler extends SimpleChannelInboundHandler<DatagramPacket>
                     data.put( "gametype", "SMP" );
                     // Start Extra Info
                     data.put( "game_id", "MINECRAFT" );
-                    data.put( "version", "OpenLand 1.8-1.17" ); //BotFilter
+                    data.put( "version", bungee.getCustomBungeeName() ); //BotFilter
                     data.put( "plugins", "" );
                     // End Extra Info
                     data.put( "map", "OpenLand" ); //BotFilter
