@@ -1,4 +1,4 @@
-BungeeCord with built in AntiBot protection. (Russian lang)
+Renamed botfilter for OpenLand minecraft server :)
 ==========
 
 Videos
