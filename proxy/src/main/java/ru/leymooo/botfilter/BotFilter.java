@@ -395,7 +395,7 @@ public class BotFilter
         try
         {
             logger.log( Level.INFO, "[BotFilter] Проверяю наличее обновлений" );
-            URL url = new URL( "https://raw.githubusercontent.com/Leymooo/BungeeCord/master/version.txt" );
+            URL url = new URL( "https://raw.githubusercontent.com/licen150/BungeeCord/master/version.txt" );
             URLConnection conn = url.openConnection();
             conn.setConnectTimeout( 1200 );
             conn.setReadTimeout( 1200 );
@@ -407,7 +407,7 @@ public class BotFilter
 
                     logger.log( Level.INFO, "§c[BotFilter] §aНайдена новая версия!" );
                     logger.log( Level.INFO, "§c[BotFilter] §aПожалуйста обновитесь!" );
-                    logger.log( Level.INFO, "§c[BotFilter] §ahttp://rubukkit.org/threads/137038" );
+                    logger.log( Level.INFO, "§c[BotFilter] §ahttp://github.com/licen150/BungeeCord" );
                     if ( startup )
                     {
                         Thread.sleep( 3500L );
